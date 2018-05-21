@@ -118,14 +118,6 @@ root@alice:~/.ssh# cat /dev/null > known_hosts
 root@alice:~/.ssh# ls
 known_hosts
 root@alice:~/.ssh# ssh-keygen -t rsa -b 4096
-Generating public/private rsa key pair.
-Enter file in which to save the key (/root/.ssh/id_rsa): noondi_rsa
-Enter passphrase (empty for no passphrase): 
-Enter same passphrase again: 
-Your identification has been saved in noondi_rsa.
-Your public key has been saved in noondi_rsa.pub.
-The key fingerprint is:
-SHA256:yiXJb6gawd5cQRKsOUpbY0XAjUvrBr9+K6jw7mxfQrQ root@alice
 The key's randomart image is:
 +---[RSA 4096]----+
 |  .oBo.          |
@@ -209,11 +201,6 @@ root@alice:/mnt/root/.ssh# cd /root/.ssh/
 root@alice:~/.ssh# pwd
 /root/.ssh
 root@alice:~/.ssh# ssh -i /root/.ssh/noondi_rsa root@192.168.209.151
-The authenticity of host '192.168.209.151 (192.168.209.151)' can't be established.'
-RSA key fingerprint is SHA256:BQHm5EoHX9GCiOLuVscegPXLQOsuPs+E9d/rrJB84rk.
-Are you sure you want to continue connecting (yes/no)? yes
-Warning: Permanently added '192.168.209.151' (RSA) to the list of known hosts.
-Last login: Fri Apr 20 23:02:33 2018 from :0.0
 Linux metasploitable 2.6.24-16-server #1 SMP Thu Apr 10 13:58:00 UTC 2008 i686
 
 The programs included with the Ubuntu system are free software;
