@@ -20,7 +20,7 @@ in Request for Comments, allowing anyone to implement the protocol.
 
 1. NMAP SCAN TARGET
 ===================
-root@alice:~# nmap -p 1-65535 -T4 -A -v 192.168.209.151 2>&1 | tee fileNFSscan.txt
+
 root@alice:~# nmap -sT -T4 -sV -p 1-65535 192.168.209.151 -oA fileNFSscan1
 Starting Nmap 7.70 ( https://nmap.org ) at 2018-05-06 16:26 EDT
 Nmap scan report for 192.168.209.151
@@ -118,6 +118,14 @@ root@alice:~/.ssh# cat /dev/null > known_hosts
 root@alice:~/.ssh# ls
 known_hosts
 root@alice:~/.ssh# ssh-keygen -t rsa -b 4096
+Generating public/private rsa key pair.
+Enter file in which to save the key (/root/.ssh/id_rsa): n0ondi_rsa
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in n0ondi_rsa.
+Your public key has been saved in n0ondi_rsa.pub.
+The key fingerprint is:
+................... ...............
 The key's randomart image is:
 +---[RSA 4096]----+
 |  .oBo.          |

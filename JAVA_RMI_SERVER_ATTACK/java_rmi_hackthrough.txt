@@ -1,18 +1,5 @@
 
 1. Run NMAP Scan against Metasploitable VM
-2. Update the java_rmi_server metasploit module
-2. Search for the RMI Service
-3. Exploit the RMI Server and obtain root.
-4. Set up PHP meterpreter LISTENER
-
-5. Create SUID Backdoor
-6. Create SUDO BackDoor
-7. Create PHP reverse_tcp Meterpreter Backdoor
-8. Escalate Privilege with SUID Backdoor
-9. Escalate Privilege with SUDO Backdoor(s)
-10. Collect Lime Forensics Image of RMI exploit
-
-1. Run NMAP Scan against Metasploitable VM
 ==========================================
 root@alice:~# pwd
 /root
